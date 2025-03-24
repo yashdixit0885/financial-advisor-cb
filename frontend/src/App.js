@@ -9,7 +9,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:3000/chat', { message: input });
+      const res = await axios.post('http://fachatbotbe-env.eba-ymnr528r.us-east-1.elasticbeanstalk.com/', { message: input });
       setResponse(res.data.advice);
       setInput('');
     } catch (error) {

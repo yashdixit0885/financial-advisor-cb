@@ -3,7 +3,7 @@ const cors = require('cors');
 const axios = require('axios');
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: 'http://facfrontend.s3-website-us-east-1.amazonaws.com/' }));
 app.use(express.json());
 
 // Replace with your API key or use an environment variable
@@ -46,6 +46,7 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
