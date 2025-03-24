@@ -3,10 +3,12 @@ const cors = require('cors');
 const axios = require('axios');
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:3001' }));
+app.use(cors());
 app.use(express.json());
 
-let conversationHistory = '';
+// Replace with your API key or use an environment variable
+require('dotenv').config();
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 app.get('/', (req, res) => {
   res.send('Backend is running');
@@ -14,22 +16,36 @@ app.get('/', (req, res) => {
 
 app.post('/chat', async (req, res) => {
   const { message } = req.body;
-  conversationHistory += `\nUser: ${message}\nAdvisor:`;
-  const prompt = `You are a financial advisor. Provide helpful advice based on the conversation.\n\n${conversationHistory}`;
+  const prompt = `You are a financial advisor. Provide helpful advice based on the user's message.\n\nUser: ${message}\nAdvisor:`;
 
   try {
-    const response = await axios.post('http://localhost:11434/api/generate', {
-      model: 'llama3.1',
-      prompt: prompt,
-      stream: false
-    });
-    const advice = response.data.response;
-    conversationHistory += ` ${advice}`;
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GOOGLE_API_KEY}`,
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt
+              }
+            ]
+          }
+        ]
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    const advice = response.data.candidates[0].content.parts[0].text;
     res.json({ advice });
   } catch (error) {
-    console.error('Error with LLaMA API:', error);
+    console.error('Error with Google AI Studio API:', error);
     res.status(500).json({ error: 'Failed to get advice' });
   }
 });
 
-app.listen(3000, '0.0.0.0', () => console.log('Server running on port 3000'));
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});

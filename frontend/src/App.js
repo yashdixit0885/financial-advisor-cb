@@ -1,35 +1,35 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 function App() {
-  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [response, setResponse] = useState('');
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    const res = await axios.post('http://localhost:3000/chat', { message: input });
-    setMessages([...messages, { user: input, bot: res.data.advice }]);
-    setInput('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('http://localhost:3000/chat', { message: input });
+      setResponse(res.data.advice);
+      setInput('');
+    } catch (error) {
+      setResponse('Error: Could not get advice.');
+    }
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="App">
       <h1>Financial Advisor Chatbot</h1>
-      <div style={{ border: '1px solid #ccc', padding: '10px', height: '400px', overflowY: 'scroll' }}>
-        {messages.map((msg, idx) => (
-          <div key={idx}>
-            <p><strong>You:</strong> {msg.user}</p>
-            <p><strong>Advisor:</strong> {msg.bot}</p>
-          </div>
-        ))}
-      </div>
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Ask me anything!"
-        style={{ width: '80%', padding: '10px' }}
-      />
-      <button onClick={sendMessage} style={{ padding: '10px' }}>Send</button>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask for financial advice..."
+        />
+        <button type="submit">Send</button>
+      </form>
+      <p>{response}</p>
     </div>
   );
 }
